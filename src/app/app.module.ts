@@ -29,8 +29,14 @@ import { AboutComponent } from './about';
 import { NoContentComponent } from './no-content';
 import { XLargeDirective } from './home/x-large';
 
+// Redux imports
+import { NgReduxModule, NgRedux } from '@angular-redux/store';
+import { createLogger } from 'redux-logger';
+import { rootReducer, IAppState } from './reducer';
+
 import '../styles/styles.scss';
 import '../styles/headings.css';
+import {NgReduxRouter, NgReduxRouterModule} from "@angular-redux/router";
 
 // Application wide providers
 const APP_PROVIDERS = [
@@ -63,6 +69,8 @@ type StoreType = {
     BrowserModule,
     FormsModule,
     HttpModule,
+    NgReduxModule,
+    NgReduxRouterModule,
     RouterModule.forRoot(ROUTES, { useHash: true, preloadingStrategy: PreloadAllModules })
   ],
   /**
@@ -73,12 +81,18 @@ type StoreType = {
     APP_PROVIDERS
   ]
 })
+
 export class AppModule {
 
   constructor(
     public appRef: ApplicationRef,
-    public appState: AppState
-  ) {}
+    public appState: AppState,
+    ngRedux: NgRedux<any>,
+    ngReduxRouter: NgReduxRouter
+  ) {
+    ngRedux.configureStore(rootReducer, {}, [ createLogger() ]);
+    ngReduxRouter.initialize();
+  }
 
   public hmrOnInit(store: StoreType) {
     if (!store || !store.state) {
